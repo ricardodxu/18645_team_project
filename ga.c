@@ -41,6 +41,8 @@ int main(int argc, char const *argv[]) {
 
   uint64_t start = rdtsc();
   int** new_population = selection(population, target);
+  printf("\n");
+  print_population(new_population);
   uint64_t end = rdtsc();
 
   uint64_t latency = end - start;
@@ -111,23 +113,31 @@ double fitness(int *base, int *target) {
       correct += 1;
     }
   }
-  return correct / INDIVIDUAL_SIZE;
+  return correct;
 }
 
 int **selection(int **population, int *target) {
   int *mating_pool = (int *)malloc(sizeof(int *) * POPULATION_SIZE);
   int idx = 0;
   for (int i = 0; i < POPULATION_SIZE; i++) {
-    int score = fitness(population[i], target);
+    int score = (int)fitness(population[i], target);
     for (int j = 0; j < score; j++) {
       mating_pool[idx] = i;
       idx = idx + 1;
     }
   }
   int **new_population = (int **)malloc(sizeof(int *) * POPULATION_SIZE);
+  int idx1 = 0;
+  int idx2 = 0;
   for (int i = 0; i < POPULATION_SIZE; i++) {
     int *mother = (int *)malloc(sizeof(int *) * INDIVIDUAL_SIZE);
+    idx1 = rand() % idx;
+    idx2 = mating_pool[idx1];
+    mother = population[idx2];
     int *father = (int *)malloc(sizeof(int *) * INDIVIDUAL_SIZE);
+    idx1 = rand() % idx;
+    idx2 = mating_pool[idx1];
+    father = population[idx2];
     int *child = crossover(mother, father);
     new_population[i] = child;
   }
