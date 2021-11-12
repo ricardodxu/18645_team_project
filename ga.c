@@ -4,7 +4,7 @@
 #include <stdlib.h>
 #include <time.h>
 
-#define POPULATION_SIZE 10
+int POPULATION_SIZE;
 #define INDIVIDUAL_SIZE 10
 
 static __inline__ unsigned long long rdtsc(void) {
@@ -18,7 +18,7 @@ int *crossover(int *father, int *mother);
 double fitness(int *base, int *target);
 
 int **selection(int **population, int *target);
-
+void sub_main(int size);
 int **init();
 int *generate_individual();
 
@@ -31,31 +31,40 @@ void print_individual(int *individual);
 int main(int argc, char const *argv[]) {
   /* code */
   srand(time(NULL));
+  
+  int size = 50;
+  for (int i = 0; i < 10; i++){
+    sub_main(size);
+    size += 50;
+  }
+  return 0;
+}
+
+void sub_main(int size) {
+  POPULATION_SIZE = size;
   int **population = init();
   int *target = generate_individual();
-  printf("target & init population: \n");
-  print_individual(target);
-  printf("\n");
+  // printf("target & init population: \n");
+  // print_individual(target);
+  // printf("\n");
 
-  print_population(population);
+  // print_population(population);
 
   uint64_t start = rdtsc();
   int** new_population = selection(population, target);
   printf("\n");
-  print_population(new_population);
+  // print_population(new_population);
   uint64_t end = rdtsc();
 
   uint64_t latency = end - start;
 
-  printf("Verify: %ld\n",
-         latency); // required to prevent the compiler from optimizing it out
+  printf("%ld\n", latency); // required to prevent the compiler from optimizing it out
   // printf("Latency: %lf\n", MAX_FREQ/BASE_FREQ * latency);   //find the
   // average latency over multiple runs
 
   free_population(new_population);
   free_population(population);
   free_individual(target);
-  return 0;
 }
 
 int **init() {
