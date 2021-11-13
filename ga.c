@@ -4,10 +4,8 @@
 #include <stdlib.h>
 #include <time.h>
 
-#include <omp.h>
-
 int POPULATION_SIZE;
-#define INDIVIDUAL_SIZE 32
+#define INDIVIDUAL_SIZE 64
 
 static __inline__ unsigned long long rdtsc(void) {
   unsigned hi, lo;
@@ -112,27 +110,25 @@ int *crossover(int *father, int *mother) {
   int i = 0;
 
   
-  for (i = 0; i < crs_idx; i+=4){
-    child[i] = father[i];
-    child[i+1] = father[i+1];
-    child[i+2] = father[i+2];
-    child[i+3] = father[i+3];
-  }
-  for (i = crs_idx; i < INDIVIDUAL_SIZE; i+=4){
-    child[i] = mother[i];
-    child[i+1] = mother[i+1];
-    child[i+2] = mother[i+2];
-    child[i+3] = mother[i+3];
-  }
+  // for (i = 0; i < crs_idx; i+=4){
+  //   child[i] = father[i];
+  //   child[i+1] = father[i+1];
+  //   child[i+2] = father[i+2];
+  //   child[i+3] = father[i+3];
+  // }
+  // for (i = crs_idx; i < INDIVIDUAL_SIZE; i+=4){
+  //   child[i] = mother[i];
+  //   child[i+1] = mother[i+1];
+  //   child[i+2] = mother[i+2];
+  //   child[i+3] = mother[i+3];
+  // }
   
-  /*
   for (i = 0; i < crs_idx; i+=4)
     child[i] = father[i];
 
   for (i = crs_idx; i < INDIVIDUAL_SIZE; i+=4)
     child[i] = mother[i];
 
-  */
   return child;
 }
 
@@ -148,24 +144,33 @@ double fitness(int *base, int *target) {
 
 int **selection(int **population, int *target) {
   int *mating_pool = (int *)malloc(sizeof(int) * POPULATION_SIZE);
-  int idx = 0;
+  int *scores = (int *)malloc(sizeof(int) * POPULATION_SIZE);
+  int total_score = 0;
+  
   for (int i = 0; i < POPULATION_SIZE; i++) {
-    int score = (int)fitness(population[i], target);
-    for (int j = 0; j < score; j++) {
-      mating_pool[idx] = i;
-      idx = idx + 1;
+    total_score += (int)fitness(population[i], target);
+    scores[i] = total_score;
+  }
+  for(int i = 0; i < POPULATION_SIZE; i++) {
+    int pivot = rand() % total_score;
+    for (int j = 0; j < POPULATION_SIZE; j++) {
+      if (scores[j] >= pivot) {
+        mating_pool[i] = j;
+        break;
+      }
     }
   }
+
   int **new_population = (int **)malloc(sizeof(int *) * POPULATION_SIZE);
   int idx1 = 0;
   int idx2 = 0;
   for (int i = 0; i < POPULATION_SIZE; i++) {
     int *mother = (int *)malloc(sizeof(int) * INDIVIDUAL_SIZE);
-    idx1 = rand() % idx;
+    idx1 = rand() % POPULATION_SIZE;
     idx2 = mating_pool[idx1];
     mother = population[idx2];
     int *father = (int *)malloc(sizeof(int) * INDIVIDUAL_SIZE);
-    idx1 = rand() % idx;
+    idx1 = rand() % POPULATION_SIZE;
     idx2 = mating_pool[idx1];
     father = population[idx2];
     int *child = crossover(mother, father);
@@ -173,6 +178,7 @@ int **selection(int **population, int *target) {
   }
 
   free(mating_pool);
+  free(scores);
   //print_population(new_population);
   return new_population;
 }
