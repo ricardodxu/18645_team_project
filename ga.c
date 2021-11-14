@@ -32,10 +32,10 @@ int main(int argc, char const *argv[]) {
   /* code */
   srand(time(NULL));
   
-  int size = 50;
+  int size = 100;
   for (int i = 0; i < 10; i++){
     sub_main(size);
-    size += 50;
+    size += 100;
   }
   return 0;
 }
@@ -134,10 +134,16 @@ int *crossover(int *father, int *mother) {
 
 double fitness(int *base, int *target) {
   double correct = 0.0;
-  for (int i = 0; i < INDIVIDUAL_SIZE; i++) {
-    if (base[i] == target[i]) {
-      correct += 1;
-    }
+  // for (int i = 0; i < INDIVIDUAL_SIZE; i++) {
+  //   if (base[i] == target[i]) {
+  //     correct += 1;
+  //   }
+  // }
+  for (int i = 0; i < INDIVIDUAL_SIZE; i+=4) {
+    if (base[i] == target[i]) correct += 1;
+    if (base[i+1] == target[i+1]) correct += 1;
+    if (base[i+2] == target[i+2]) correct += 1;
+    if (base[i+3] == target[i+3]) correct += 1;
   }
   return correct;
 }
